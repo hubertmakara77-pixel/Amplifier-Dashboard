@@ -1,0 +1,6 @@
+fastapi
+uvicorn
+pyserial
+jinja2
+influxdb-client
+pysnmp>=4.4.12

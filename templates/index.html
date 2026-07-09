@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Amplifier Control Panel</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+
+<body>
+    <div class="layout">
+        <aside class="sidebar">
+            <div class="sidebar-logo">Amplifier Panel</div>
+
+            <nav class="sidebar-nav">
+                <div class="nav-group">
+                    <span class="nav-group-title">Device</span>
+                    <button type="button" class="nav-link active" data-tab="standard-view"
+                        data-title="Dashboard">Dashboard</button>
+                </div>
+
+                <div class="nav-group">
+                    <span class="nav-group-title">Monitor</span>
+                    <button type="button" class="nav-link" data-tab="overview" data-title="Overview">Overview</button>
+                    <button type="button" class="nav-link" data-tab="statistics"
+                        data-title="Statistics">Statistics</button>
+                    <button type="button" class="nav-link" data-tab="warnings" data-title="Warnings">Warnings</button>
+                </div>
+
+                <div class="nav-group">
+                    <span class="nav-group-title">Administration</span>
+                    <button type="button" class="nav-link" data-tab="access-control" data-title="Access Control">Access
+                        Control</button>
+                </div>
+                <div class="nav-group">
+                    <span class="nav-group-title">Configuration</span>
+                    <button type="button" class="nav-link" data-tab="snmp-settings" data-title="SNMP Settings">SNMP
+                        Configuration</button>
+                </div>
+            </nav>
+        </aside>
+
+        <div class="main">
+            <header class="topbar">
+                <h1 id="current-tab-title">Dashboard</h1>
+            </header>
+
+            <div class="status-bar">
+                <div class="status-item">Last update: <span id="status-last-update">--</span></div>
+                <div class="status-item">System time: <span id="status-system-time">--</span></div>
+                <div class="status-item">Device status: <span id="status-connection"
+                        class="status-error">DISCONNECTED</span></div>
+            </div>
+
+            <main class="content">
+                <section class="tab-panel active" data-tab="standard-view">
+                    <div class="standard-grid">
+                        <div class="amp-board">
+                            <div class="amp-diagram" aria-label="Amplifier diagram">
+                                <svg class="amp-lines" viewBox="0 0 900 330" role="img">
+                                    <defs>
+                                        <marker id="arrow-right" markerWidth="28" markerHeight="20" refX="0" refY="10"
+                                            orient="auto" markerUnits="userSpaceOnUse">
+                                            <path d="M 0 0 L 26 10 L 0 20 z"></path>
+                                        </marker>
+                                    </defs>
+
+                                    <line class="signal-line" x1="74" y1="88" x2="244" y2="88"
+                                        marker-end="url(#arrow-right)"></line>
+                                    <line class="signal-line" x1="270" y1="242" x2="84" y2="242"
+                                        marker-end="url(#arrow-right)"></line>
+                                    <line class="signal-line" x1="630" y1="88" x2="816" y2="88"
+                                        marker-end="url(#arrow-right)"></line>
+                                    <line class="signal-line" x1="826" y1="242" x2="656" y2="242"
+                                        marker-end="url(#arrow-right)"></line>
+
+                                    <path class="amp-shape" d="M 270 35 L 630 165 L 270 295 Z"></path>
+                                    <path class="amp-shape" d="M 630 35 L 270 165 L 630 295 Z"></path>
+                                </svg>
+
+                                <div class="port-readout port-a-in">
+                                    <span>Port A IN</span>
+                                    <strong id="p-a-in">-- dBm</strong>
+                                </div>
+                                <div class="port-readout port-a-out">
+                                    <span>Port A OUT</span>
+                                    <strong id="p-a-out">-- dBm</strong>
+                                </div>
+                                <div class="port-readout port-b-out">
+                                    <span>Port B OUT</span>
+                                    <strong id="p-b-out">-- dBm</strong>
+                                </div>
+                                <div class="port-readout port-b-in">
+                                    <span>Port B IN</span>
+                                    <strong id="p-b-in">-- dBm</strong>
+                                </div>
+                            </div>
+
+                            <div class="metric-strip">
+                                <div class="metric-item metric-primary">
+                                    <span>Actual Gain</span>
+                                    <strong id="gain-actual">-- dB</strong>
+                                </div>
+                                <div class="metric-secondary-row">
+                                    <div class="metric-item">
+                                        <span>Gain Delta</span>
+                                        <strong id="gain-delta">-- dB</strong>
+                                    </div>
+                                    <div class="metric-item">
+                                        <span>Temperature</span>
+                                        <strong id="temperature">-- C</strong>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="warning-counter">
+                                <span>Warnings</span>
+                                <strong id="warning-count">0</strong>
+                            </div>
+                        </div>
+
+                        <div class="control-strip">
+                            <div class="settings-header control-save-header">
+                                <h2>Setpoints & Thresholds</h2>
+                                <button id="save-settings-button" type="button">Save</button>
+                            </div>
+
+                            <div class="control-block control-section">
+                                <h2>Gain Setpoint</h2>
+                                <div class="gain-control">
+                                    <input id="gain-set-input" type="number" step="0.1" placeholder="--">
+                                </div>
+                            </div>
+
+                            <div class="control-block control-section threshold-panel">
+                                <div class="section-title-row">
+                                    <h2>Warning Thresholds</h2>
+                                </div>
+
+                                <label class="threshold-label threshold-inline">
+                                    <span>Max gain:</span>
+                                    <input id="gain-tolerance-input" type="number" step="0.01" min="0" value="0.25">
+                                </label>
+
+                                <div class="limit-list">
+                                    <div class="limit-header">
+                                        <span></span>
+                                        <span>MIN</span>
+                                        <span>MAX</span>
+                                    </div>
+                                    <div class="limit-row">
+                                        <span>Port A IN</span>
+                                        <input data-limit-field="p_a_in" data-limit-side="min" type="number" step="0.01"
+                                            placeholder="min">
+                                        <input data-limit-field="p_a_in" data-limit-side="max" type="number" step="0.01"
+                                            placeholder="max">
+                                    </div>
+                                    <div class="limit-row">
+                                        <span>Port A OUT</span>
+                                        <input data-limit-field="p_a_out" data-limit-side="min" type="number"
+                                            step="0.01" placeholder="min">
+                                        <input data-limit-field="p_a_out" data-limit-side="max" type="number"
+                                            step="0.01" placeholder="max">
+                                    </div>
+                                    <div class="limit-row">
+                                        <span>Port B IN</span>
+                                        <input data-limit-field="p_b_in" data-limit-side="min" type="number" step="0.01"
+                                            placeholder="min">
+                                        <input data-limit-field="p_b_in" data-limit-side="max" type="number" step="0.01"
+                                            placeholder="max">
+                                    </div>
+                                    <div class="limit-row">
+                                        <span>Port B OUT</span>
+                                        <input data-limit-field="p_b_out" data-limit-side="min" type="number"
+                                            step="0.01" placeholder="min">
+                                        <input data-limit-field="p_b_out" data-limit-side="max" type="number"
+                                            step="0.01" placeholder="max">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </section>
+
+                <section class="tab-panel" data-tab="overview">
+                    <div class="monitors-header">
+                        <div class="range-buttons">
+                            <button type="button" class="range-button active" data-range="5m">5 min</button>
+                            <button type="button" class="range-button" data-range="1h">1 h</button>
+                            <button type="button" class="range-button" data-range="24h">24 h</button>
+                            <button type="button" class="range-button" data-range="7d">7 days</button>
+                            <button type="button" class="range-button" data-range="30d">30 days</button>
+                            <button type="button" class="range-button" data-range="all">All</button>
+                        </div>
+                    </div>
+
+                    <div class="charts-grid">
+                        <div class="chart-card">
+                            <h3>Port Power</h3>
+                            <canvas id="power-chart"></canvas>
+                        </div>
+                        <div class="chart-card">
+                            <h3>Gain</h3>
+                            <canvas id="gain-chart"></canvas>
+                        </div>
+                        <div class="chart-card">
+                            <h3>Gain Delta</h3>
+                            <canvas id="delta-chart"></canvas>
+                        </div>
+                        <div class="chart-card">
+                            <h3>Temperature</h3>
+                            <canvas id="temperature-chart"></canvas>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="tab-panel" data-tab="statistics">
+                    <div class="monitors-header">
+                        <div class="range-buttons">
+                            <button type="button" class="range-button active" data-range="5m">5 min</button>
+                            <button type="button" class="range-button" data-range="1h">1 h</button>
+                            <button type="button" class="range-button" data-range="24h">24 h</button>
+                            <button type="button" class="range-button" data-range="7d">7 days</button>
+                            <button type="button" class="range-button" data-range="30d">30 days</button>
+                            <button type="button" class="range-button" data-range="all">All</button>
+                        </div>
+                    </div>
+
+                    <div class="data-panel">
+                        <div class="table-header">
+                            <h2>Statistics</h2>
+                            <span id="statistics-source">--</span>
+                        </div>
+                        <table class="plain-table">
+                            <thead>
+                                <tr>
+                                    <th>Parameter</th>
+                                    <th>Min</th>
+                                    <th>Max</th>
+                                    <th>Average</th>
+                                    <th>Max delta</th>
+                                </tr>
+                            </thead>
+                            <tbody id="statistics-table-body">
+                                <tr>
+                                    <td colspan="5">No data</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <section class="tab-panel" data-tab="warnings">
+                    <div class="data-panel">
+                        <div class="table-header">
+                            <h2>Warnings</h2>
+                            <button id="clear-errors-button" type="button">Clear</button>
+                        </div>
+                        <table class="plain-table">
+                            <thead>
+                                <tr>
+                                    <th>Time</th>
+                                    <th>Parameter</th>
+                                    <th>Value</th>
+                                    <th>Threshold</th>
+                                    <th>Delta</th>
+                                    <th>Description</th>
+                                </tr>
+                            </thead>
+                            <tbody id="warnings-table-body">
+                                <tr>
+                                    <td colspan="6">No warnings</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <section class="tab-panel" data-tab="access-control">
+                    <div class="access-grid">
+                        <form id="access-user-form" class="control-strip access-form">
+                            <div class="settings-header control-save-header">
+                                <h2>Add User</h2>
+                                <button type="submit">Add</button>
+                            </div>
+
+                            <label class="form-field">
+                                Username
+                                <input id="access-username-input" type="text" autocomplete="off" required>
+                            </label>
+
+                            <label class="form-field">
+                                Password
+                                <input id="access-password-input" type="password" autocomplete="new-password" required>
+                            </label>
+
+                            <label class="form-field">
+                                Role
+                                <select id="access-role-input">
+                                    <option value="Administrator">Administrator</option>
+                                    <option value="Operator" selected>Operator</option>
+                                    <option value="Viewer">Viewer</option>
+                                </select>
+                            </label>
+
+                            <label class="toggle-field">
+                                <input id="access-active-input" type="checkbox" checked>
+                                Active user
+                            </label>
+                        </form>
+
+                        <div class="data-panel">
+                            <div class="table-header">
+                                <h2>Users</h2>
+                                <span id="access-users-count">--</span>
+                            </div>
+                            <table class="plain-table access-table">
+                                <thead>
+                                    <tr>
+                                        <th>Username</th>
+                                        <th>Role</th>
+                                        <th>Status</th>
+                                        <th>Password</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="access-users-table-body">
+                                    <tr>
+                                        <td colspan="5">No users</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+                <section class="tab-panel" data-tab="snmp-settings">
+                    <div class="access-grid">
+                        <form id="snmp-settings-form" class="control-strip access-form">
+                            <div class="settings-header control-save-header">
+                                <h2>SNMP Daemon Configuration</h2>
+                                <button type="submit">Save Settings</button>
+                            </div>
+
+                            <label class="toggle-field">
+                                <input id="snmp-enabled-input" type="checkbox" checked>
+                                Enable SNMP Agent
+                            </label>
+
+                            <label class="form-field">
+                                SNMP Port
+                                <input id="snmp-port-input" type="number" value="161" required>
+                            </label>
+
+                            <label class="form-field">
+                                Community String (v2c)
+                                <input id="snmp-community-input" type="text" value="public" required>
+                            </label>
+
+                            <label class="form-field">
+                                Trap Target IP
+                                <input id="snmp-trap-host-input" type="text" value="127.0.0.1" required>
+                            </label>
+
+                            <label class="form-field">
+                                Trap Target Port
+                                <input id="snmp-trap-port-input" type="number" value="162" required>
+                            </label>
+                        </form>
+
+                        <div class="data-panel">
+                            <div class="table-header">
+                                <h2>SNMP Live Status</h2>
+                            </div>
+                            <div class="control-strip" style="background: #121b18;">
+                                <p>Możesz odpytywać ten wzmacniacz za pomocą komendy:</p>
+                                <code
+                                    style="color: #63e6a0; font-family: monospace; display: block; padding: 10px; background: #0c1110; border-radius: 4px; margin-top: 5px;">
+                                snmpwalk -v 2c -c <span id="info-community">public</span> 127.0.0.1:<span id="info-port">161</span> 1.3.6.1.4.1.99999
+                            </code>
+                            </div>
+                            <div id="snmp-live-values" class="control-strip">
+                                <p>Oczekiwanie na zapytanie SNMP...</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </main>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="/static/js/dashboard.js"></script>
+</body>
+
+</html>

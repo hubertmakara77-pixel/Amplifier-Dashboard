@@ -6,7 +6,7 @@ DEVICE_NAME = "optical_amp_1"
 INFLUX_ENABLED = True
 
 INFLUX_URL = "http://localhost:8086"
-INFLUX_TOKEN = "my-super-token"
+INFLUX_TOKEN = "RAEkYikFlc8ZB-z9XxePKofc3Wd4EbYb9zJV6znfgzaLaOWudvadOEGjm4tGkDR_0MaBNvQpGltq0SBsECCRJA=="
 INFLUX_ORG = "agh"
 INFLUX_BUCKET = "sensors"
 

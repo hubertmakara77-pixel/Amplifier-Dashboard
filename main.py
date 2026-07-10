@@ -324,7 +324,11 @@ def update_snmp_settings(request: SnmpSettingsUpdateRequest):
 
 @app.get("/api/history")
 def history(range: str = "5m"):
-    influx_points = influx_service.query_history_from_influx(range)
+    try:
+        influx_points = influx_service.query_history_from_influx(range)
+    except Exception as e:
+        print("InfluxDB history query failed:", e)
+        influx_points = None
 
     if influx_points is not None:
         return {
@@ -356,4 +360,3 @@ def set_gain(request: GainSetRequest):
         "status": "ok",
         "gain_set": request.gain_set
     }
-

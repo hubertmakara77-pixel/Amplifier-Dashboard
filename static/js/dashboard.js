@@ -576,6 +576,48 @@ function setupRangeButtons() {
 	})
 }
 
+const SNMP_FIELD_LABELS = {
+	status: 'Connection status',
+	p_a_in: 'Port A IN',
+	p_a_out: 'Port A OUT',
+	p_b_in: 'Port B IN',
+	p_b_out: 'Port B OUT',
+	gain_set: 'Gain set',
+	gain_actual: 'Gain actual',
+	gain_delta: 'Gain delta',
+	temperature: 'Temperature',
+	seq_nr: 'Sequence nr',
+}
+
+async function updateSnmpLiveValues() {
+	const container = document.getElementById('snmp-live-values')
+	if (!container) return
+
+	try {
+		const response = await fetch('/api/snmp/live_data')
+		if (!response.ok) throw new Error('HTTP error ' + response.status)
+		const liveData = await response.json()
+
+		if (!liveData || Object.keys(liveData).length === 0) {
+			container.innerHTML = '<p>Oczekiwanie na dane z agenta SNMP...</p>'
+			return
+		}
+
+		const rows = Object.entries(SNMP_FIELD_LABELS)
+			.filter(([field]) => field in liveData)
+			.map(([field, label]) => {
+				const value = liveData[field]
+				return `<div class="limit-row"><span>${escapeHtml(label)}</span><span>${escapeHtml(value)}</span></div>`
+			})
+			.join('')
+
+		container.innerHTML = `<div class="limit-list">${rows}</div>`
+	} catch (error) {
+		container.innerHTML = '<p>Błąd pobierania danych SNMP.</p>'
+		console.error('Error loading SNMP live data:', error)
+	}
+}
+
 async function loadSnmpSettings() {
 	try {
 		const response = await fetch('/api/snmp/settings')
@@ -594,6 +636,8 @@ async function loadSnmpSettings() {
 	} catch (error) {
 		console.error('Error loading SNMP settings:', error)
 	}
+
+	updateSnmpLiveValues()
 }
 
 // Obsługa wysyłki formularza
@@ -655,6 +699,8 @@ setInterval(() => {
 	if (statisticsTab && statisticsTab.classList.contains('active')) {
 		updateStatisticsTable()
 	}
+	const snmpTab = document.querySelector('.tab-panel[data-tab="snmp-settings"]')
+	if (snmpTab && snmpTab.classList.contains('active')) {
+		updateSnmpLiveValues()
+	}
 }, 3000)
-
-

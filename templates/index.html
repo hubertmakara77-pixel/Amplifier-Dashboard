@@ -373,15 +373,16 @@
                             <div class="table-header">
                                 <h2>SNMP Live Status</h2>
                             </div>
-                            <div class="control-strip" style="background: #121b18;">
-                                <p>Możesz odpytywać ten wzmacniacz za pomocą komendy:</p>
+                            <div id="snmp-live-values" class="control-strip">
+                                <p>Oczekiwanie na dane z agenta SNMP...</p>
+                            </div>
+                            <div class="control-strip" style="background: #121b18; margin-top: 12px;">
+                                <p>Powyższe wartości odświeżają się automatycznie same. Jeśli chcesz też sprawdzić agenta z zewnętrznego narzędzia SNMP, to jest to polecenie terminala (PowerShell/WSL, wymaga zainstalowanych narzędzi Net-SNMP) — nie wpisuje się go na tej stronie:</p>
                                 <code
                                     style="color: #63e6a0; font-family: monospace; display: block; padding: 10px; background: #0c1110; border-radius: 4px; margin-top: 5px;">
                                 snmpwalk -v 2c -c <span id="info-community">public</span> 127.0.0.1:<span id="info-port">161</span> 1.3.6.1.4.1.99999
                             </code>
-                            </div>
-                            <div id="snmp-live-values" class="control-strip">
-                                <p>Oczekiwanie na zapytanie SNMP...</p>
+                                <p class="small-info">Alternatywnie, bez instalowania Net-SNMP: uruchom <code>python test_snmp.py</code> w folderze projektu — używa tej samej biblioteki pysnmp co reszta aplikacji.</p>
                             </div>
                         </div>
                     </div>

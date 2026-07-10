@@ -202,11 +202,22 @@ def serial_reader_loop():
 
                 state.active_warning_keys = current_warning_keys
 
-            influx_service.write_measurement(data)
+            try:
+                influx_service.write_measurement(data)
+            except Exception as e:
+                print("InfluxDB write failed:", e)
 
             for error in syslog_warnings:
-                syslog_service.send_warning(format_syslog_warning(error))
-                snmp_service.send_trap(error)
+                try:
+                    syslog_service.send_warning(format_syslog_warning(error))
+                except Exception as e:
+                    print("Syslog send failed:", e)
+
+                try:
+                    snmp_service.send_trap(error)
+                except Exception as e:
+                    print("SNMP trap send failed:", e)
+
             print("Reading:", data)
 
     except serial.SerialException as e:
@@ -241,4 +252,7 @@ def send_gain_set(gain_set: float):
         state.last_known_gain_set = float(gain_set)
         state.save_persisted_gain_set(state.last_known_gain_set)
 
-    influx_service.write_setpoint(gain_set)
+    try:
+        influx_service.write_setpoint(gain_set)
+    except Exception as e:
+        print("InfluxDB write_setpoint failed:", e)

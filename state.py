@@ -159,6 +159,7 @@ def save_persisted_access_users() -> None:
 
 
 latest_data = {}
+latest_snmp_data = {}
 serial_connected = False
 serial_error = None
 last_update = None
@@ -179,12 +180,3 @@ dashboard_settings = merge_dashboard_settings(persisted_state.get("dashboard_set
 access_users = merge_access_users(persisted_state.get("access_users"))
 
 snmp_settings = persisted_state.get("snmp_settings", DEFAULT_SNMP_SETTINGS.copy())
-
-
-snmp_settings = persisted_state.get("snmp_settings", {
-    "enabled": False,
-    "port": 1611,
-    "community": "public",
-    "trap_host": "127.0.0.1",
-    "trap_port": 162
-})

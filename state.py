@@ -57,6 +57,14 @@ def hash_password(password: str, salt: str | None = None) -> tuple[str, str]:
 DEFAULT_ACCESS_USERS[0]["password_hash"], DEFAULT_ACCESS_USERS[0]["password_salt"] = hash_password("admin")
 
 
+def verify_password(user: dict, password: str) -> bool:
+    if not user.get("password_hash") or not user.get("password_salt"):
+        return False
+
+    expected_hash, _ = hash_password(password, salt=user["password_salt"])
+    return secrets.compare_digest(expected_hash, user["password_hash"])
+
+
 def load_persisted_state() -> dict:
     path = pathlib.Path(config.PERSISTED_STATE_FILE)
 

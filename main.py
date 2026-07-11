@@ -6,8 +6,10 @@ import snmp_service
 import fastapi
 import fastapi.staticfiles
 import fastapi.templating
+import fastapi.responses
 import pydantic
 import starlette.requests
+import starlette.middleware.sessions
 
 import config
 import influx_service
@@ -129,6 +131,35 @@ async def lifespan(app: fastapi.FastAPI):
 
 app = fastapi.FastAPI(lifespan=lifespan)
 
+PUBLIC_PATHS = {"/login"}
+
+
+@app.middleware("http")
+async def auth_guard(request: starlette.requests.Request, call_next):
+    path = request.url.path
+    logged_in = bool(request.session.get("username"))
+
+    if path.startswith("/static"):
+        return await call_next(request)
+
+    if path in PUBLIC_PATHS:
+        return await call_next(request)
+
+    if not logged_in:
+        if path.startswith("/api"):
+            return fastapi.responses.JSONResponse({"detail": "Not authenticated"}, status_code=401)
+        return fastapi.responses.RedirectResponse("/login")
+
+    return await call_next(request)
+
+
+app.add_middleware(
+    starlette.middleware.sessions.SessionMiddleware,
+    secret_key=config.SESSION_SECRET_KEY,
+    session_cookie="amp_session",
+)
+
+
 app.mount(
     "/static",
     fastapi.staticfiles.StaticFiles(directory="static"),
@@ -138,12 +169,52 @@ app.mount(
 templates = fastapi.templating.Jinja2Templates(directory="templates")
 
 
+@app.get("/login")
+def login_page(request: starlette.requests.Request):
+    if request.session.get("username"):
+        return fastapi.responses.RedirectResponse("/")
+
+    return templates.TemplateResponse(
+        request=request,
+        name="login.html",
+        context={"error": None}
+    )
+
+
+@app.post("/login")
+def login_submit(
+    request: starlette.requests.Request,
+    username: str = fastapi.Form(...),
+    password: str = fastapi.Form(...),
+):
+    user = find_access_user(username.strip())
+
+    if user is None or not user.get("active", True) or not state.verify_password(user, password):
+        return templates.TemplateResponse(
+            request=request,
+            name="login.html",
+            context={"error": "Nieprawidłowy login lub hasło"},
+            status_code=401,
+        )
+
+    request.session["username"] = user["username"]
+    request.session["role"] = user["role"]
+
+    return fastapi.responses.RedirectResponse("/", status_code=303)
+
+
+@app.get("/logout")
+def logout(request: starlette.requests.Request):
+    request.session.clear()
+    return fastapi.responses.RedirectResponse("/login")
+
+
 @app.get("/")
 def home(request: starlette.requests.Request):
     return templates.TemplateResponse(
         request=request,
         name="index.html",
-        context={}
+        context={"username": request.session.get("username")}
     )
 
 

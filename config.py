@@ -3,10 +3,14 @@ SERIAL_BAUDRATE = 9600
 
 DEVICE_NAME = "optical_amp_1"
 
+# Klucz do podpisywania ciasteczek sesji logowania.
+# W realnym wdrożeniu wygeneruj losowy, długi ciąg i trzymaj go poza kodem (np. zmienna środowiskowa).
+SESSION_SECRET_KEY = "zmien-ten-klucz-na-cos-losowego-i-dlugiego"
+
 INFLUX_ENABLED = True
 
 INFLUX_URL = "http://localhost:8086"
-INFLUX_TOKEN = "RAEkYikFlc8ZB-z9XxePKofc3Wd4EbYb9zJV6znfgzaLaOWudvadOEGjm4tGkDR_0MaBNvQpGltq0SBsECCRJA=="
+INFLUX_TOKEN = "my-super-token"
 INFLUX_ORG = "agh"
 INFLUX_BUCKET = "sensors"
 
